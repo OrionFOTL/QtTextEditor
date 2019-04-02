@@ -4,7 +4,6 @@
 #include <QMainWindow>
 
 #include <QCloseEvent>
-#include <QSettings>
 
 namespace Ui {
 class MainWindow;
@@ -29,7 +28,6 @@ private slots:
 
 private:
     Ui::MainWindow *ui;
-    QSettings settings;
 };
 
 #endif // MAINWINDOW_H
