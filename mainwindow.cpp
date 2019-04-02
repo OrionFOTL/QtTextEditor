@@ -1,7 +1,9 @@
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
 
+#include <QFontDialog>
 #include <QMessageBox>
+#include <QSettings>
 
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
@@ -14,6 +16,11 @@ MainWindow::MainWindow(QWidget *parent) :
 
     connect(ui->textEdit, SIGNAL(textChanged()), this, SLOT(documentModified()));
     this->setWindowTitle("TextEditor[*]");
+
+    QSettings settings;
+    QVariant fontValue = settings.value("viewFont");
+    QFont chosenFont = fontValue.value<QFont>();
+    ui->textEdit->setFont(chosenFont);
 }
 
 MainWindow::~MainWindow()
@@ -41,4 +48,14 @@ void MainWindow::closeEvent(QCloseEvent *e)
         else e->ignore();
     }
     else e->accept();
+}
+
+void MainWindow::on_actionSelectFont_triggered()
+{
+    bool ok;
+    QFont chosenFont = QFontDialog::getFont(&ok,ui->textEdit->font(),this);
+    if (ok) ui->textEdit->setFont(chosenFont);
+
+    QSettings settings;
+    settings.setValue("viewFont",chosenFont);
 }

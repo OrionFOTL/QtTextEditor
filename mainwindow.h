@@ -4,6 +4,7 @@
 #include <QMainWindow>
 
 #include <QCloseEvent>
+#include <QSettings>
 
 namespace Ui {
 class MainWindow;
@@ -24,8 +25,11 @@ private slots:
     void on_actionNew_triggered();
     void documentModified();
 
+    void on_actionSelectFont_triggered();
+
 private:
     Ui::MainWindow *ui;
+    QSettings settings;
 };
 
 #endif // MAINWINDOW_H
