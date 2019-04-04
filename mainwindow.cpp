@@ -21,7 +21,24 @@ MainWindow::MainWindow(QWidget *parent) :
     QVariant fontValue = settings.value("viewFont");
     QFont chosenFont = fontValue.value<QFont>();
     ui->textEdit->setFont(chosenFont);
+
+    connect(ui->actionAboutQt, SIGNAL(triggered()), qApp, SLOT(aboutQt()));
+    connect(ui->actionCut, SIGNAL(triggered()), ui->textEdit, SLOT(cut()));
+    connect(ui->actionCopy, SIGNAL(triggered()), ui->textEdit, SLOT(copy()));
+    connect(ui->actionPaste, SIGNAL(triggered()), ui->textEdit, SLOT(paste()));
+    connect(ui->actionUndo, SIGNAL(triggered()), ui->textEdit, SLOT(undo()));
+    connect(ui->actionRedo, SIGNAL(triggered()), ui->textEdit, SLOT(redo()));
+    connect(ui->textEdit, SIGNAL(copyAvailable(bool)), ui->actionCopy, SLOT(setEnabled(bool)));
+    connect(ui->textEdit, SIGNAL(copyAvailable(bool)), ui->actionCut, SLOT(setEnabled(bool)));
+    connect(ui->textEdit, SIGNAL(undoAvailable(bool)), ui->actionUndo, SLOT(setEnabled(bool)));
+    connect(ui->textEdit, SIGNAL(redoAvailable(bool)), ui->actionRedo, SLOT(setEnabled(bool)));
+    
+    ui->actionCopy->setEnabled(false);
+    ui->actionCut->setEnabled(false);
+    ui->actionUndo->setEnabled(false);
+    ui->actionRedo->setEnabled(false);
 }
+
 
 MainWindow::~MainWindow()
 {
@@ -58,4 +75,9 @@ void MainWindow::on_actionSelectFont_triggered()
 
     QSettings settings;
     settings.setValue("viewFont",chosenFont);
+}
+
+void MainWindow::on_actionAbout_triggered()
+{
+    QMessageBox::about(this, "About this application", "Simple text editor with multiple windows and customizable font");
 }
