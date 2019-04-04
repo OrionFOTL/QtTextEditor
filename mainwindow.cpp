@@ -1,11 +1,14 @@
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
 
+#include <QFileDialog>
+#include <QFileInfo>
 #include <QFontDialog>
 #include <QMessageBox>
 #include <QSettings>
+#include <QTextStream>
 
-MainWindow::MainWindow(QWidget *parent) :
+MainWindow::MainWindow(const QString &fileName, QWidget *parent) :
     QMainWindow(parent),
     ui(new Ui::MainWindow)
 {
@@ -37,6 +40,8 @@ MainWindow::MainWindow(QWidget *parent) :
     ui->actionCut->setEnabled(false);
     ui->actionUndo->setEnabled(false);
     ui->actionRedo->setEnabled(false);
+
+    loadFile(fileName);
 }
 
 
@@ -80,4 +85,52 @@ void MainWindow::on_actionSelectFont_triggered()
 void MainWindow::on_actionAbout_triggered()
 {
     QMessageBox::about(this, "About this application", "Simple text editor with multiple windows and customizable font");
+}
+
+void MainWindow::loadFile(const QString &fileName)
+{
+    if (fileName.isEmpty())
+    {
+        setFileName(QString());
+        return;
+    }
+
+    QFile *file = new QFile(fileName);
+    if (!file->open(QIODevice::ReadOnly | QIODevice::Text))
+    {
+        QMessageBox::warning(this,"Error","Couldn't open file");
+        setFileName(QString());
+        return;
+    }
+
+    QTextStream input(file);
+    ui->textEdit->setText( input.readAll() );
+
+    file->close();
+    delete file;
+
+    setFileName(fileName);
+    this->setWindowModified(false);
+}
+
+void MainWindow::setFileName(const QString &fileName)
+{
+    m_fileName = fileName;
+    this->setWindowTitle(QString("%1[*] - %2")
+                         .arg(m_fileName.isNull()?"untitled":QFileInfo(m_fileName).fileName())
+                         .arg(QApplication::applicationName()));
+}
+
+void MainWindow::on_actionOpen_triggered()
+{
+    QString fileName = QFileDialog::getOpenFileName(this, "Open document", QDir::currentPath(), "Text documents (*.txt)");
+    if (fileName.isNull()) return;
+
+    if (this->m_fileName.isNull() && !this->isWindowModified()) loadFile((fileName));
+    else
+    {
+        MainWindow *newFile = new MainWindow(fileName);
+        newFile->show();
+    }
+
 }

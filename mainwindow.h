@@ -14,7 +14,7 @@ class MainWindow : public QMainWindow
     Q_OBJECT
 
 public:
-    explicit MainWindow(QWidget *parent = nullptr);
+    explicit MainWindow(const QString &fileName=QString(), QWidget *parent = nullptr);
     ~MainWindow();
 
 protected:
@@ -28,8 +28,13 @@ private slots:
 
     void on_actionAbout_triggered();
 
+    void on_actionOpen_triggered();
+
 private:
     Ui::MainWindow *ui;
+    QString m_fileName;
+    void loadFile(const QString &fileName);
+    void setFileName(const QString &m_fileName);
 };
 
 #endif // MAINWINDOW_H
