@@ -42,6 +42,9 @@ MainWindow::MainWindow(const QString &fileName, QWidget *parent) :
     ui->actionRedo->setEnabled(false);
 
     loadFile(fileName);
+
+    connect(ui->actionSave, SIGNAL(triggered()), this, SLOT(saveFile()));
+    connect(ui->actionSaveAs, SIGNAL(triggered()), this, SLOT(saveFileAs()));
 }
 
 
@@ -65,9 +68,19 @@ void MainWindow::closeEvent(QCloseEvent *e)
 {
     if (this->isWindowModified())
     {
-        if (QMessageBox::warning(this,"Document Modified","The document has been modified, do you want to close it? \r\nYou will lose all your changes.","Yes","No",nullptr,1) == 0)
+        switch (QMessageBox::warning(this, "Document Modified", "The document has been modified. Do you want to save your changes?\nYou will lose any unsaved changes.", QMessageBox::Yes | QMessageBox::No | QMessageBox::Cancel, QMessageBox::Cancel)) {
+        case QMessageBox::Yes:
+            if (saveFile()) e->accept();
+            else e->ignore();
+            break;
+        case QMessageBox::No:
             e->accept();
-        else e->ignore();
+            break;
+        case QMessageBox::Cancel:
+            e->ignore();
+            break;
+        default: e->ignore();
+        }
     }
     else e->accept();
 }
@@ -133,4 +146,36 @@ void MainWindow::on_actionOpen_triggered()
         newFile->show();
     }
 
+}
+
+bool MainWindow::saveFile()
+{
+    if (m_fileName.isNull()) return saveFileAs();
+    else {
+       QFile *file = new QFile(m_fileName);
+       if(!file->open(QIODevice::WriteOnly | QIODevice::Text))
+       {
+           QMessageBox::warning(this, "Error", "File couldn't be saved");
+           setFileName(QString());
+           return false;
+       }
+       else {
+           QTextStream stream(file);
+           stream << ui->textEdit->toPlainText();
+       }
+       file->close();
+       this->setWindowModified(false);
+       return true;
+    }
+}
+
+bool MainWindow::saveFileAs()
+{
+    QString fileName = QFileDialog::getSaveFileName(this, "Save document", m_fileName.isNull()?QDir::currentPath():m_fileName, "Text documents (*.txt)");
+    if (fileName.isNull()) return false;
+    else
+    {
+        setFileName(fileName);
+        return saveFile();
+    }
 }

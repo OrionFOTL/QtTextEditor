@@ -30,6 +30,9 @@ private slots:
 
     void on_actionOpen_triggered();
 
+    bool saveFile();
+    bool saveFileAs();
+
 private:
     Ui::MainWindow *ui;
     QString m_fileName;
